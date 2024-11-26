@@ -8,13 +8,149 @@ git push -u origin master
 
 sistema-gestion-libros-electronicos/
 ├── cmd/                   # Archivos principales de ejecución (main.go)
-├── internal/              # Funciones y módulos internos del sistema
-│   ├── libros/            # Gestión de libros (CRUD)
-│   ├── usuarios/          # Gestión de usuarios (registro, login)
-│   ├── seguridad/         # Módulo de seguridad (cifrado, autenticación)
-├── pkg/                   # Librerías y paquetes compartidos
-├── web/                   # Archivos de frontend (HTML, CSS, JS)
-├── go.mod                 # Módulo Go para la gestión de dependencias
-├── go.sum                 # Archivo de dependencias verificadas
-├── README.md              # Descripción del proyecto
+├── modulos/
+│   ├── libros/
+│   │   ├── libro.go
+│   │   ├── gestion.go
+│   │   └── registro.go
+│   ├── usuarios/
+│   │   ├── usuario.go
+│   │   ├── gestion.go
+│   │   └── registro.go
+├── seguridad/
+│   ├── validaciones.go
+│   ├── cifrado.go
+├── go.mod
+├── go.sum
+└── README.md
 ├── .gitignore             # Archivos y carpetas a ignorar en Git
+
+package main
+
+import (
+	"fmt"
+	"sistema-gestion-libros-electronicos/modulos/libros"
+	"sistema-gestion-libros-electronicos/modulos/usuarios"
+)
+
+func main() {
+	fmt.Println("Bienvenido al Sistema de Gestión de Libros Electrónicos")
+	libros.Menu()
+	usuarios.Menu()
+}
+
+package libros
+
+type Libro struct {
+	Titulo  string
+	Autor   string
+	ISBN    string
+	Genero  string
+	EnStock bool
+}
+
+package libros
+
+import "fmt"
+
+var libros = []Libro{}
+
+func RegistrarLibro() {
+	var titulo, autor, isbn, genero string
+	fmt.Println("Ingrese los detalles del libro:")
+	fmt.Print("Título: ")
+	fmt.Scanln(&titulo)
+	fmt.Print("Autor: ")
+	fmt.Scanln(&autor)
+	fmt.Print("ISBN: ")
+	fmt.Scanln(&isbn)
+	fmt.Print("Género: ")
+	fmt.Scanln(&genero)
+
+	libro := Libro{Titulo: titulo, Autor: autor, ISBN: isbn, Genero: genero, EnStock: true}
+	libros = append(libros, libro)
+	fmt.Println("Libro registrado con éxito.")
+}
+
+func ListarLibros() {
+	fmt.Println("Listado de Libros:")
+	for i, libro := range libros {
+		fmt.Printf("%d. %s por %s (ISBN: %s)\n", i+1, libro.Titulo, libro.Autor, libro.ISBN)
+	}
+}
+
+func Menu() {
+	var opcion int
+	for {
+		fmt.Println("1. Registrar Libro")
+		fmt.Println("2. Listar Libros")
+		fmt.Println("3. Salir")
+		fmt.Print("Seleccione una opción: ")
+		fmt.Scanln(&opcion)
+
+		switch opcion {
+		case 1:
+			RegistrarLibro()
+		case 2:
+			ListarLibros()
+		case 3:
+			return
+		default:
+			fmt.Println("Opción no válida")
+		}
+	}
+}
+
+package usuarios
+
+type Usuario struct {
+	Nombre   string
+	Correo   string
+	Password string
+	Rol      string // "admin" o "lector"
+}
+
+package usuarios
+
+import "fmt"
+
+var usuarios = []Usuario{}
+
+func RegistrarUsuario() {
+	var nombre, correo, password, rol string
+	fmt.Println("Ingrese los detalles del usuario:")
+	fmt.Print("Nombre: ")
+	fmt.Scanln(&nombre)
+	fmt.Print("Correo: ")
+	fmt.Scanln(&correo)
+	fmt.Print("Contraseña: ")
+	fmt.Scanln(&password)
+	fmt.Print("Rol (admin/lector): ")
+	fmt.Scanln(&rol)
+
+	usuario := Usuario{Nombre: nombre, Correo: correo, Password: password, Rol: rol}
+	usuarios = append(usuarios, usuario)
+	fmt.Println("Usuario registrado con éxito.")
+}
+
+func Menu() {
+	var opcion int
+	for {
+		fmt.Println("1. Registrar Usuario")
+		fmt.Println("2. Salir")
+		fmt.Print("Seleccione una opción: ")
+		fmt.Scanln(&opcion)
+
+		switch opcion {
+		case 1:
+			RegistrarUsuario()
+		case 2:
+			return
+		default:
+			fmt.Println("Opción no válida")
+		}
+	}
+}
+
+
+
