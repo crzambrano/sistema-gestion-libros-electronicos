@@ -7,14 +7,19 @@ git commit -m "Initial commit"
 git push -u origin master
 
 sistema-gestion-libros-electronicos/
-├── cmd/                   # Archivos principales de ejecución (main.go)
-├── internal/              # Funciones y módulos internos del sistema
-│   ├── libros/            # Gestión de libros (CRUD)
-│   ├── usuarios/          # Gestión de usuarios (registro, login)
-│   ├── seguridad/         # Módulo de seguridad (cifrado, autenticación)
-├── pkg/                   # Librerías y paquetes compartidos
-├── web/                   # Archivos de frontend (HTML, CSS, JS)
-├── go.mod                 # Módulo Go para la gestión de dependencias
-├── go.sum                 # Archivo de dependencias verificadas
-├── README.md              # Descripción del proyecto
-├── .gitignore             # Archivos y carpetas a ignorar en Git
+├── main.go
+├── modules/
+│   ├── libros/
+│   │   ├── libro.go
+│   │   ├── gestion.go
+│   │   └── registro.go
+│   ├── usuarios/
+│   │   ├── usuario.go
+│   │   ├── gestion.go
+│   │   └── registro.go
+├── utils/
+│   ├── validaciones.go
+│   ├── reportes.go
+├── go.mod
+├── go.sum
+└── README.md             # Descripción del proyecto
