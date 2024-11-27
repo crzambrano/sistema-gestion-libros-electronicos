@@ -1,25 +1,125 @@
-mkdir sistema-gestion-libros-electronicos
-cd sistema-gestion-libros-electronicos
-git init
+package main
 
-git add .
-git commit -m "Initial commit"
-git push -u origin master
+import (
+	"fmt"
+	"strings"
+)
 
-sistema-gestion-libros-electronicos/
-├── main.go
-├── modules/
-│   ├── libros/
-│   │   ├── libro.go
-│   │   ├── gestion.go
-│   │   └── registro.go
-│   ├── usuarios/
-│   │   ├── usuario.go
-│   │   ├── gestion.go
-│   │   └── registro.go
-├── utils/
-│   ├── validaciones.go
-│   ├── reportes.go
-├── go.mod
-├── go.sum
-└── README.md             # Descripción del proyecto
+// Estructura para representar un libro
+type Libro struct {
+	Titulo    string
+	Autor     string
+	Paginas   int
+	Publicado bool
+}
+
+// Slice para almacenar el catálogo de libros
+var catalogo []Libro
+
+// Función para agregar un libro al catálogo
+func AgregarLibro(titulo string, autor string, paginas int, publicado bool) {
+	libro := Libro{
+		Titulo:    titulo,
+		Autor:     autor,
+		Paginas:   paginas,
+		Publicado: publicado,
+	}
+	catalogo = append(catalogo, libro)
+	fmt.Println("Libro agregado exitosamente.")
+}
+
+// Función para buscar libros por título
+func BuscarPorTitulo(titulo string) {
+	fmt.Printf("Buscando libros que contengan: '%s'\n", titulo)
+	encontrados := []Libro{}
+	for _, libro := range catalogo {
+		if strings.Contains(strings.ToLower(libro.Titulo), strings.ToLower(titulo)) {
+			encontrados = append(encontrados, libro)
+		}
+	}
+	if len(encontrados) == 0 {
+		fmt.Println("No se encontraron libros.")
+	} else {
+		fmt.Println("Libros encontrados:")
+		for _, libro := range encontrados {
+			fmt.Printf("- %s, Autor: %s\n", libro.Titulo, libro.Autor)
+		}
+	}
+}
+
+// Función para listar todos los libros
+func ListarLibros() {
+	if len(catalogo) == 0 {
+		fmt.Println("El catálogo está vacío.")
+		return
+	}
+	fmt.Println("Lista de libros en el catálogo:")
+	for i, libro := range catalogo {
+		fmt.Printf("%d. %s, Autor: %s, Páginas: %d, Publicado: %t\n",
+			i+1, libro.Titulo, libro.Autor, libro.Paginas, libro.Publicado)
+	}
+}
+
+// Función para eliminar un libro por título
+func EliminarLibro(titulo string) {
+	fmt.Printf("Intentando eliminar el libro con título: '%s'\n", titulo)
+	for i, libro := range catalogo {
+		if strings.ToLower(libro.Titulo) == strings.ToLower(titulo) {
+			catalogo = append(catalogo[:i], catalogo[i+1:]...)
+			fmt.Println("Libro eliminado exitosamente.")
+			return
+		}
+	}
+	fmt.Println("No se encontró ningún libro con ese título.")
+}
+
+// Función principal para probar el sistema
+func main() {
+	// Menú interactivo
+	for {
+		fmt.Println("\nSistema de Gestión de Libros Electrónicos")
+		fmt.Println("1. Agregar libro")
+		fmt.Println("2. Buscar libro por título")
+		fmt.Println("3. Listar todos los libros")
+		fmt.Println("4. Eliminar libro")
+		fmt.Println("5. Salir")
+		fmt.Print("Seleccione una opción: ")
+
+		var opcion int
+		fmt.Scanln(&opcion)
+
+		switch opcion {
+		case 1:
+			var titulo, autor string
+			var paginas int
+			var publicado bool
+			fmt.Print("Ingrese el título del libro: ")
+			fmt.Scanln(&titulo)
+			fmt.Print("Ingrese el autor del libro: ")
+			fmt.Scanln(&autor)
+			fmt.Print("Ingrese el número de páginas: ")
+			fmt.Scanln(&paginas)
+			fmt.Print("¿El libro está publicado? (true/false): ")
+			fmt.Scanln(&publicado)
+			AgregarLibro(titulo, autor, paginas, publicado)
+		case 2:
+			var titulo string
+			fmt.Print("Ingrese el título o parte del título a buscar: ")
+			fmt.Scanln(&titulo)
+			BuscarPorTitulo(titulo)
+		case 3:
+			ListarLibros()
+		case 4:
+			var titulo string
+			fmt.Print("Ingrese el título del libro a eliminar: ")
+			fmt.Scanln(&titulo)
+			EliminarLibro(titulo)
+		case 5:
+			fmt.Println("Saliendo del sistema. ¡Hasta luego!")
+			return
+		default:
+			fmt.Println("Opción no válida. Intente nuevamente.")
+		}
+	}
+}
+
