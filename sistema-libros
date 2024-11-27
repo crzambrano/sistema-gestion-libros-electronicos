@@ -1,3 +1,11 @@
+mkdir sistema-gestion-libros-electronicos
+cd sistema-gestion-libros-electronicos
+git init
+
+git add .
+git commit -m "Initial commit"
+git push -u origin master
+
 package main
 
 import (
