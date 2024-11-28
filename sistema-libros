@@ -11,6 +11,9 @@ package main
 import (
 	"fmt"
 	"strings"
+	"fmt"
+	"crypto/sha256"
+	"encoding/hex"
 )
 
 // Estructura para representar un libro
@@ -131,3 +134,79 @@ func main() {
 	}
 }
 
+
+// Usuario: estructura para la gestión de usuarios
+type Usuario struct {
+	Nombre     string
+	Email      string
+	Contraseña string
+}
+
+// Seguridad: funciones relacionadas con cifrado y autenticación
+func cifrarContraseña(password string) string {
+	hash := sha256.Sum256([]byte(password))
+	return hex.EncodeToString(hash[:])
+}
+
+func autenticarUsuario(usuarios []Usuario, email, contraseña string) bool {
+	contraseñaCifrada := cifrarContraseña(contraseña)
+	for _, usuario := range usuarios {
+		if usuario.Email == email && usuario.Contraseña == contraseñaCifrada {
+			return true
+		}
+	}
+	return false
+}
+
+// Módulo de gestión de usuarios
+func registrarUsuario(usuarios *[]Usuario, nombre, email, contraseña string) {
+	contraseñaCifrada := cifrarContraseña(contraseña)
+	nuevoUsuario := Usuario{Nombre: nombre, Email: email, Contraseña: contraseñaCifrada}
+	*usuarios = append(*usuarios, nuevoUsuario)
+	fmt.Println("Usuario registrado:", nombre)
+}
+
+// Librerías y funciones comunes (pkg)
+func imprimirMenu() {
+	fmt.Println("1. Registrar usuario")
+	fmt.Println("2. Iniciar sesión")
+	fmt.Println("3. Salir")
+}
+
+func main() {
+	usuarios := []Usuario{}
+	var opcion int
+	for {
+		imprimirMenu()
+		fmt.Print("Seleccione una opción: ")
+		fmt.Scanln(&opcion)
+
+		switch opcion {
+		case 1:
+			var nombre, email, contraseña string
+			fmt.Print("Nombre: ")
+			fmt.Scanln(&nombre)
+			fmt.Print("Email: ")
+			fmt.Scanln(&email)
+			fmt.Print("Contraseña: ")
+			fmt.Scanln(&contraseña)
+			registrarUsuario(&usuarios, nombre, email, contraseña)
+		case 2:
+			var email, contraseña string
+			fmt.Print("Email: ")
+			fmt.Scanln(&email)
+			fmt.Print("Contraseña: ")
+			fmt.Scanln(&contraseña)
+			if autenticarUsuario(usuarios, email, contraseña) {
+				fmt.Println("Inicio de sesión exitoso.")
+			} else {
+				fmt.Println("Credenciales incorrectas.")
+			}
+		case 3:
+			fmt.Println("Saliendo del sistema...")
+			return
+		default:
+			fmt.Println("Opción no válida.")
+		}
+	}
+}
