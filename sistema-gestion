@@ -1,0 +1,216 @@
+package main
+
+import (
+	"bufio"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"os"
+	"strings"
+)
+
+// Estructuras
+type Libro struct {
+	Titulo     string
+	Autor      string
+	ISBN       string
+	Publicado  int
+	Categoria  string
+}
+
+type Usuario struct {
+	Username string
+	Password string // Almacenado como hash
+}
+
+// Variables globales
+var libros []Libro
+var usuarios []Usuario
+var usuarioActual Usuario
+
+// Funciones de seguridad
+func hashPassword(password string) string {
+	hash := sha256.Sum256([]byte(password))
+	return hex.EncodeToString(hash[:])
+}
+
+func autenticarUsuario(username, password string) bool {
+	for _, usuario := range usuarios {
+		if usuario.Username == username && usuario.Password == hashPassword(password) {
+			return true
+		}
+	}
+	return false
+}
+
+// Gestión de usuarios
+func registrarUsuario() {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Ingrese su nombre de usuario: ")
+	username, _ := reader.ReadString('\n')
+	username = strings.TrimSpace(username)
+
+	fmt.Print("Ingrese su contraseña: ")
+	password, _ := reader.ReadString('\n')
+	password = strings.TrimSpace(password)
+
+	usuario := Usuario{
+		Username: username,
+		Password: hashPassword(password),
+	}
+
+	usuarios = append(usuarios, usuario)
+	fmt.Println("¡Usuario registrado exitosamente!")
+}
+
+func iniciarSesion() bool {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Ingrese su nombre de usuario: ")
+	username, _ := reader.ReadString('\n')
+	username = strings.TrimSpace(username)
+
+	fmt.Print("Ingrese su contraseña: ")
+	password, _ := reader.ReadString('\n')
+	password = strings.TrimSpace(password)
+
+	if autenticarUsuario(username, password) {
+		usuarioActual = Usuario{Username: username}
+		fmt.Println("Inicio de sesión exitoso.")
+		return true
+	}
+
+	fmt.Println("Credenciales incorrectas.")
+	return false
+}
+
+// Gestión de libros
+func registrarLibro() {
+	if usuarioActual.Username == "" {
+		fmt.Println("Debe iniciar sesión para registrar un libro.")
+		return
+	}
+
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Ingrese el título del libro: ")
+	titulo, _ := reader.ReadString('\n')
+	titulo = strings.TrimSpace(titulo)
+
+	fmt.Print("Ingrese el autor del libro: ")
+	autor, _ := reader.ReadString('\n')
+	autor = strings.TrimSpace(autor)
+
+	fmt.Print("Ingrese el ISBN del libro: ")
+	isbn, _ := reader.ReadString('\n')
+	isbn = strings.TrimSpace(isbn)
+
+	fmt.Print("Ingrese el año de publicación: ")
+	var publicado int
+	fmt.Scanln(&publicado)
+
+	fmt.Print("Ingrese la categoría del libro: ")
+	categoria, _ := reader.ReadString('\n')
+	categoria = strings.TrimSpace(categoria)
+
+	libro := Libro{
+		Titulo:     titulo,
+		Autor:      autor,
+		ISBN:       isbn,
+		Publicado:  publicado,
+		Categoria:  categoria,
+	}
+
+	libros = append(libros, libro)
+	fmt.Println("¡Libro registrado exitosamente!")
+}
+
+func listarLibros() {
+	if len(libros) == 0 {
+		fmt.Println("No hay libros registrados.")
+		return
+	}
+
+	fmt.Println("Listado de libros:")
+	for i, libro := range libros {
+		fmt.Printf("%d. Título: %s | Autor: %s | ISBN: %s | Año: %d | Categoría: %s\n", i+1, libro.Titulo, libro.Autor, libro.ISBN, libro.Publicado, libro.Categoria)
+	}
+}
+
+func buscarLibro() {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Ingrese el título del libro a buscar: ")
+	busqueda, _ := reader.ReadString('\n')
+	busqueda = strings.TrimSpace(busqueda)
+
+	encontrado := false
+	for _, libro := range libros {
+		if strings.Contains(strings.ToLower(libro.Titulo), strings.ToLower(busqueda)) {
+			fmt.Printf("Libro encontrado: Título: %s | Autor: %s | ISBN: %s | Año: %d | Categoría: %s\n",
+				libro.Titulo, libro.Autor, libro.ISBN, libro.Publicado, libro.Categoria)
+			encontrado = true
+		}
+	}
+
+	if !encontrado {
+		fmt.Println("No se encontraron libros con ese título.")
+	}
+}
+
+func eliminarLibro() {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Ingrese el título del libro a eliminar: ")
+	busqueda, _ := reader.ReadString('\n')
+	busqueda = strings.TrimSpace(busqueda)
+
+	for i, libro := range libros {
+		if strings.Contains(strings.ToLower(libro.Titulo), strings.ToLower(busqueda)) {
+			libros = append(libros[:i], libros[i+1:]...)
+			fmt.Println("¡Libro eliminado exitosamente!")
+			return
+		}
+	}
+
+	fmt.Println("No se encontró ningún libro con ese título.")
+}
+
+// Función principal
+func main() {
+	for {
+		fmt.Println("\nSistema de Gestión de Libros Electrónicos")
+		fmt.Println("1. Registrar usuario")
+		fmt.Println("2. Iniciar sesión")
+		fmt.Println("3. Registrar libro")
+		fmt.Println("4. Listar libros")
+		fmt.Println("5. Buscar libro por título")
+		fmt.Println("6. Eliminar libro")
+		fmt.Println("7. Salir")
+		fmt.Print("Seleccione una opción: ")
+
+		var opcion int
+		fmt.Scanln(&opcion)
+
+		switch opcion {
+		case 1:
+			registrarUsuario()
+		case 2:
+			if iniciarSesion() {
+				fmt.Println("Bienvenido,", usuarioActual.Username)
+			}
+		case 3:
+			registrarLibro()
+		case 4:
+			listarLibros()
+		case 5:
+			buscarLibro()
+		case 6:
+			eliminarLibro()
+		case 7:
+			fmt.Println("Saliendo del sistema...")
+			return
+		default:
+			fmt.Println("Opción no válida. Intente nuevamente.")
+		}
+	}
+}
